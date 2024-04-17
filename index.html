@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Clock with Custom Alarm</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            color: #180242;
+            text-align: center;
+            background-color: aqua;
+        }
+
+        #clock {
+            font-size: 72px;
+            margin-top: 150px;
+        }
+
+        #date {
+            font-size: 50px;
+        }
+
+        #alarm {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="clock"></div>
+    <div id="date"></div>
+    <input type="time" id="alarmTime">
+    <button onclick="setAlarm()" style="background-color: #4CAF50; /* Green */
+  border: none;
+  color: rgb(249, 252, 252);
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  border-radius: 12px;">Definir Alarme</button>
+
+    <div id="alarm"></div>
+    <button id="stopButton" onclick="stopAlarmAndReloadPage()" style="background-color: red; /* Red */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 18px;
+    margin-top: 20px;
+    cursor: pointer;
+    border-radius: 12px;">Parar Alarme</button>
+  
+    <!-- Elemento de áudio para tocar a música do alarme -->
+    <audio id="alarmSound" src="Oppo.mp3" preload="auto" loop></audio>
+    
+    <script>
+        let alarmInterval;
+        let loopInterval;
+
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+            
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = now.toLocaleDateString('pt-BR', options);
+            document.getElementById('date').textContent = dateStr;
+
+            // Verifica se o horário atual corresponde ao horário do alarme
+            const alarmTime = document.getElementById('alarmTime').value;
+            const [alarmHour, alarmMinute] = alarmTime.split(":");
+            if (parseInt(alarmHour) === now.getHours() && parseInt(alarmMinute) === now.getMinutes()) {
+                document.getElementById('alarm').textContent = "Alarme disparado!";
+                document.getElementById('alarmSound').play();
+                alarmInterval = setTimeout(stopAlarm, 30000); // Parar o alarme após 30 segundos
+            }
+        }
+
+        function setAlarm() {
+            document.getElementById('alarmSound').muted = false; // Retirar o mudo
+            const alarmTime = document.getElementById('alarmTime').value;
+            const [alarmHour, alarmMinute] = alarmTime.split(":");
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+
+            if (parseInt(alarmHour) === currentHour && parseInt(alarmMinute) === currentMinute) {
+                document.getElementById('alarm').textContent = "Alarme disparado!";
+                document.getElementById('alarmSound').play();
+                alarmInterval = setTimeout(stopAlarm, 30000);
+            } else {
+                document.getElementById('alarm').textContent = "Alarme definido para " + alarmTime;
+            }
+        }
+
+        function stopAlarmAndReloadPage() {
+            clearTimeout(alarmInterval);
+            document.getElementById('alarm').textContent = "Alarme parado!";
+            const alarmSound = document.getElementById('alarmSound');
+            alarmSound.currentTime = 0; // Definir o tempo de reprodução para 0
+            alarmSound.pause();
+            alarmSound.muted = true; // Colocar o som no mudo
+            
+            // Recarregar a página
+            location.reload();
+        }
+
+        function loopAlarmSound() {
+            const alarmSound = document.getElementById('alarmSound');
+            alarmSound.currentTime = 0; // Reinicia o áudio
+            alarmSound.play();
+            loopInterval = setInterval(function() {
+                alarmSound.currentTime = 0; // Reinicia o áudio a cada 5 segundos
+                alarmSound.play();
+            }, 5000);
+        }
+
+        function stopLoopAlarmSound() {
+            clearInterval(loopInterval);
+        }
+
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
